@@ -8,6 +8,7 @@ import com.codegym.service.product.IProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -72,17 +73,24 @@ public class ProductController {
     @GetMapping("/edit/{id}")
     private ModelAndView showEditForm(@PathVariable Long id){
         Optional<Product> product =  this.productService.findById(id);
+        if(!product.isPresent()){
+            ModelAndView modelAndView = new ModelAndView("/product/error-404");
+        }
         ModelAndView modelAndView = new ModelAndView("/product/edit");
         modelAndView.addObject("product",product.get());
         return modelAndView;
     }
     @PostMapping("/edit/{id}")
     private ModelAndView editProduct(@PathVariable Long id,@ModelAttribute ProductForm productForm){
-        Optional<Product> oldProduct = this.productService.findById(id);
+        Optional<Product> product = this.productService.findById(id);
         String image;
         MultipartFile imageFile = productForm.getImage();
+        if (!product.isPresent()){
+            ModelAndView modelAndView = new ModelAndView("/product/error-404");
+        }
+        Product oldProduct = product.get();
         if (imageFile.getSize()== 0){
-            image = oldProduct.get().getImage();
+            image = oldProduct.getImage();
         }else{
             String fileName = imageFile.getOriginalFilename();
             long currentTime = System.currentTimeMillis();
@@ -102,6 +110,9 @@ public class ProductController {
     @GetMapping("/delete/{id}")
     private ModelAndView showDeleteForm(@PathVariable Long id){
         Optional<Product> product =  this.productService.findById(id);
+        if (!product.isPresent()){
+            ModelAndView modelAndView = new ModelAndView("/product/error-404");
+        }
         ModelAndView modelAndView = new ModelAndView("/product/delete");
         modelAndView.addObject("product",product.get());
         return modelAndView;
@@ -109,6 +120,9 @@ public class ProductController {
     @PostMapping("/delete/{id}")
     private ModelAndView deleteProduct(@PathVariable Long id){
         Optional<Product> product =  this.productService.findById(id);
+        if (!product.isPresent()){
+            ModelAndView modelAndView = new ModelAndView("/product/error-404");
+        }
         this.productService.delete(id);
         ModelAndView modelAndView = new ModelAndView("redirect:/products");
         return modelAndView;
@@ -116,6 +130,9 @@ public class ProductController {
     @GetMapping("/view/{id}")
     private ModelAndView showProductDetails(@PathVariable Long id){
         Optional<Product> product =  this.productService.findById(id);
+        if (!product.isPresent()){
+            ModelAndView modelAndView = new ModelAndView("/product/error-404");
+        }
         ModelAndView modelAndView = new ModelAndView("/product/view");
         modelAndView.addObject("product",product.get());
         return modelAndView;
